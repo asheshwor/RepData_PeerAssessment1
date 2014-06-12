@@ -24,7 +24,8 @@ stepsPerDay <- ddply(act, c("date"), function(xdf) {
   return(data.frame(sum))})
 ```
 
-This gives the dataframe ```stepsPerDay``` with sum of steps per day.
+This gives the dataframe ```stepsPerDay``` with sum of total steps taken for each day in the dataset.
+
 ```{r eval=TRUE}
 head(stepsPerDay,8)
 ```
@@ -62,7 +63,7 @@ hplot1
 
 ## Exploring the average daily activity pattern
 
-The following code plots a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days.
+The following code plots a time series plot of the 5-minute interval and the average number of steps taken, averaged across all days. First, the data is summarized by total number of steps for each interval using ```ddply``` function. 
 
 ```{r eval=TRUE, fig.height=6, fig.width=8}
 stepsPerInterval <- ddply(act, c("interval"), function(xdf) {
@@ -70,11 +71,35 @@ stepsPerInterval <- ddply(act, c("interval"), function(xdf) {
   mean <- mean(xdf$steps, na.rm=TRUE)
   median <- median (xdf$steps, na.rm=TRUE)
   return(data.frame(cbind(sum, mean, median)))})
+```
+
+The stepsPerInterval dataframe has the summary of the number of steps, mean steps and median steps for each interval.
+
+```{r eval=TRUE, fig.height=6, fig.width=8}
+head(stepsPerInterval,8)
+```
+
+The following code plots the average number of steps for the intervals averaged across all the days available.
+
+
+```{r eval=TRUE, fig.height=6, fig.width=8}
 with(stepsPerInterval, plot(interval, mean, type="n", main="Average daily steps pattern", ylab="Steps",
                        xlab="Date"))
 with(stepsPerInterval, lines(interval, mean))
 with(stepsPerInterval, abline(v=stepsPerInterval[stepsPerInterval$sum == max(stepsPerInterval$sum), c(1)],
                               col="red"))
+require(xts)
+require(scales)
+data.xts <- as.xts(1:288, as.POSIXct("2014-01-01 00:00", tz = "GMT") + 60 * 5 * (0:287))
+stepsPerInterval$timeInterval <- index(data.xts)
+p.intervals <- ggplot() + geom_line(data=stepsPerInterval,
+                               aes(timeInterval, mean),
+                               stat="identity", alpha=1, size=.7, col="brown") +
+  ggtitle(paste("Daily activity pattern")) +
+  scale_x_datetime(breaks = "1 hour", labels=date_format("%H:%M:%S")) +
+  xlab("5 minute intervals") + ylab("average number of steps") +
+  theme_bw() + theme(legend.position="none", axis.text.x = element_text(angle = 90, hjust = 1))
+p.intervals
 ```
 
 
@@ -83,9 +108,12 @@ The following code calculates particular 5-minute interval which contains the ma
 ```{r eval=TRUE, fig.height=6, fig.width=8}
 stepsPerInterval[stepsPerInterval$sum == max(stepsPerInterval$sum),]
 ```
+As shown in the above output, the maximum number of average steps is taken at interval 835 i.e. from 8:35am to 8:40am interval.
 
 ## Imputing missing values
+
 The following code calculate the total number of missing values in the dataset.
+
 ```{r eval=TRUE}
 sum(is.na(act$steps))
 ```
@@ -143,8 +171,15 @@ hplot2 <- ggplot(stepsPerDay2, aes(x=sum)) +
   ggtitle("Histogram of total steps per day")
 hplot2
 ```
+
 ## Are there differences in activity patterns between weekdays and weekends?
+
+To check differences in activity pattern during weekdays and weekends, the data needs to be classified into two categories - weekend or weekday. The following code adds a ```weekend``` column to the act2 dataframe which has a string weekend or weekday depending on wheather the date is a weekend or a weekday respectively.
+
 ```{r eval=TRUE, fig.height=6, fig.width=8}
+##function to check if a date is a weekend or a weekday
+## the function is not named as a verb in line with the is.{condition} format as in
+## is.na or is.data.frame
 is.weekend <- function(xdate) {
   if (weekdays(xdate) == "Saturday" | weekdays(xdate) == "Sunday") {return("Weekend")} else
   {return("Weekday")}
@@ -152,17 +187,19 @@ is.weekend <- function(xdate) {
 act2$weekend <- sapply(act2$date, is.weekend)
 act2$weekend <- factor(act2$weekend)
 ```
-Plot
+
+The following code plots the activity data by weekend variable.
+
 ```{r eval=TRUE, fig.height=6, fig.width=8}
 stepsPerIntervalWeek <- ddply(act2, c( "weekend","interval"), function(xdf) {
   sum <- sum(xdf$steps, na.rm=TRUE)
   mean <- mean(xdf$steps, na.rm=TRUE)
   median <- median (xdf$steps, na.rm=TRUE)
   return(data.frame(cbind(sum, mean, median)))})
-plot3 <- qplot(interval, sum, data = stepsPerIntervalWeek, geom=c("line"), method="lm",
-               xlab="Year",
-               ylab="Total emissions in tons",
-               main = "Trend in total PM2.5 emissions from coal related combustion in United States") +
+plot3 <- qplot(interval, mean, data = stepsPerIntervalWeek, geom=c("line"),
+               xlab="5 minute interval",
+               ylab="Average number of steps taken",
+               main = "Differences in daily activity trend - weekday vs. weekend") +
    theme(legend.position="bottom") + theme_bw() + facet_wrap(~weekend, ncol=1)
 plot3
 ```
