@@ -5,8 +5,7 @@
 With the proliferation of personal activity monioring devices, it is now possible to get data on personal movements and behaviour. This exercise uses R to explore the data collected from a personal activity monitoring device which collects data at 5 minute intervals through out the day. The dataset consists of two months of data collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
 ## Loading and preprocessing the data
-First of all, the data is read using r
-ead.csv function.
+First of all, the data is read using read.csv function. The data file ```activity.csv``` is already in the data subfolder. This has been tested in windows machine only and may require a different path for other platforms.
 
 ```{r eval=TRUE}
 act <- read.csv("data/activity.csv", header=TRUE, na.strings= "NA",
