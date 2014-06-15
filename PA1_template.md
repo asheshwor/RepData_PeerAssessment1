@@ -5,7 +5,8 @@
 With the proliferation of personal activity monioring devices, it is now possible to get data on personal movements and behaviour. This exercise uses R to explore the data collected from a personal activity monitoring device which collects data at 5 minute intervals through out the day. The dataset consists of two months of data collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
 ## Loading and preprocessing the data
-First of all, the data is read using read.csv function.
+First of all, the data is read using r
+ead.csv function.
 
 
 ```r
@@ -131,16 +132,6 @@ The following code plots the average number of steps for the intervals averaged 
 
 
 ```r
-with(stepsPerInterval, plot(interval, mean, type = "n", main = "Average daily steps pattern", 
-    ylab = "Steps", xlab = "Date"))
-with(stepsPerInterval, lines(interval, mean))
-with(stepsPerInterval, abline(v = stepsPerInterval[stepsPerInterval$sum == max(stepsPerInterval$sum), 
-    c(1)], col = "red"))
-```
-
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-81.png) 
-
-```r
 library(xts)
 ```
 
@@ -167,7 +158,7 @@ p.intervals <- ggplot() + geom_line(data = stepsPerInterval, aes(timeInterval,
 p.intervals
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-82.png) 
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
 
 
 
@@ -280,7 +271,7 @@ print(list(mean = meanSteps, median = medianSteps))
 ```
 
 
-The following code creates a histogram of the total number of steps taken each day.
+The mean and median are not the same value. Due to imputaion of missing values based on the average for the time interval, the distribution of the steps count have changed. The following code creates a histogram of the total number of steps taken each day.
 
 
 ```r
@@ -289,8 +280,13 @@ hplot2 <- ggplot(stepsPerDay2, aes(x = sum)) + geom_histogram(binwidth = 1000,
     colour = "black", fill = "lightblue") + # geom_density(alpha=.2, colour='red3') +
 geom_vline(data = stepsPerDay2, aes(xintercept = mean(sum, na.rm = T)), size = 1, 
     linetype = 2, colour = "blue") + geom_vline(data = stepsPerDay2, aes(xintercept = median(sum, 
-    na.rm = T)), size = 1, linetype = 3, colour = "red") + xlab("Total number of steps") + 
-    ylab("Count") + ggtitle("Histogram of total steps per day")
+    na.rm = T)), size = 1, linetype = 3, colour = "red") + geom_text(aes(mean(sum, 
+    na.rm = T) - 400, 15, label = paste0("Mean = ", as.character(round(mean(sum, 
+    na.rm = T)), 2))), angle = 90, color = "blue", size = 4, data = stepsPerDay2) + 
+    geom_text(aes(median(sum, na.rm = T) - 400, 5, label = paste0("Median = ", 
+        as.character(round(median(sum, na.rm = T)), 2))), angle = 90, color = "red", 
+        size = 4, data = stepsPerDay2) + xlab("Total number of steps") + ylab("Count") + 
+    ggtitle("Histogram of total steps per day")
 hplot2
 ```
 
@@ -314,7 +310,7 @@ is.weekend <- function(xdate) {
     }
 }
 act2$weekend <- sapply(act2$date, is.weekend)
-act2$weekend <- factor(act2$weekend)
+act2$weekend <- factor(act2$weekend)  #convert to factor
 ```
 
 
@@ -340,6 +336,8 @@ plot3
 
 ![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17.png) 
 
+
+From the above graph, we can compare the daily activity trends during weekdays and weekends. There are some distinct differences in the two graphs. There are more average steps in weekday mornings compared to weekend mornings from 6-8am. During the day, the weekend sees more activity compared to week days. The weekend activities is also pushed up till lateer compared to weekdays.
 
 
 
