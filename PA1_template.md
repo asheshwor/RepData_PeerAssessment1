@@ -21,14 +21,7 @@ The following code uses plyr to summarize the data by calculating sum of number 
 
 
 ```r
-require(plyr)
-```
-
-```
-## Loading required package: plyr
-```
-
-```r
+library(plyr)
 stepsPerDay <- ddply(act, c("date"), function(xdf) {
     sum <- sum(xdf$steps, na.rm = TRUE)
     return(data.frame(sum))
@@ -78,14 +71,7 @@ The following code plots the histogram of the total number of steps taken each d
 
 
 ```r
-require(ggplot2)
-```
-
-```
-## Loading required package: ggplot2
-```
-
-```r
+library(ggplot2)
 hplot1 <- ggplot(stepsPerDay, aes(x = sum)) + geom_histogram(binwidth = 1000, 
     colour = "black", fill = "lightgrey")
 hplot1 <- hplot1 + geom_vline(data = stepsPerDay, aes(xintercept = mean(sum, 
@@ -155,11 +141,10 @@ with(stepsPerInterval, abline(v = stepsPerInterval[stepsPerInterval$sum == max(s
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-81.png) 
 
 ```r
-require(xts)
+library(xts)
 ```
 
 ```
-## Loading required package: xts
 ## Loading required package: zoo
 ## 
 ## Attaching package: 'zoo'
@@ -170,14 +155,7 @@ require(xts)
 ```
 
 ```r
-require(scales)
-```
-
-```
-## Loading required package: scales
-```
-
-```r
+library(scales)
 data.xts <- as.xts(1:288, as.POSIXct("2014-01-01 00:00", tz = "GMT") + 60 * 
     5 * (0:287))
 stepsPerInterval$timeInterval <- index(data.xts)
@@ -350,9 +328,13 @@ stepsPerIntervalWeek <- ddply(act2, c("weekend", "interval"), function(xdf) {
     median <- median(xdf$steps, na.rm = TRUE)
     return(data.frame(cbind(sum, mean, median)))
 })
-plot3 <- qplot(interval, sum, data = stepsPerIntervalWeek, geom = c("line"), 
-    method = "lm", xlab = "Year", ylab = "Total emissions in tons", main = "Trend in total PM2.5 emissions from coal related combustion in United States") + 
-    theme(legend.position = "bottom") + theme_bw() + facet_wrap(~weekend, ncol = 1)
+stepsPerIntervalWeek$timeInterval <- index(data.xts)
+plot3 <- ggplot() + geom_line(data = stepsPerIntervalWeek, aes(timeInterval, 
+    mean), stat = "identity", alpha = 1, size = 0.7, col = "brown") + ggtitle(paste("Differences in daily activity trend - weekday vs. weekend")) + 
+    scale_x_datetime(breaks = "1 hour", labels = date_format("%H:%M:%S")) + 
+    xlab("5 minute intervals") + ylab("average number of steps") + theme_bw() + 
+    theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    facet_wrap(~weekend, ncol = 1)
 plot3
 ```
 
