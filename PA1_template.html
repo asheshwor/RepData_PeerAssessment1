@@ -187,8 +187,7 @@ hljs.initHighlightingOnLoad();
 
 <h2>Loading and preprocessing the data</h2>
 
-<p>First of all, the data is read using r
-ead.csv function.</p>
+<p>First of all, the data is read using read.csv function. The data file <code>activity.csv</code> is already in the data subfolder. This has been tested in windows machine only and may require a different path for other platforms.</p>
 
 <pre><code class="r">act &lt;- read.csv(&quot;data/activity.csv&quot;, header = TRUE, na.strings = &quot;NA&quot;, colClasses = c(&quot;integer&quot;, 
     &quot;Date&quot;, &quot;integer&quot;))
